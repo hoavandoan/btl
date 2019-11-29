@@ -57,7 +57,7 @@ const AppNavigator = createStackNavigator({
   PayScreen: {
     screen: PayScreen,
     navigationOptions:{
-      headerTitle: 'Nạp tiền'
+      headerTitle: 'Nạp tiền vào ví'
     }
   }
 },
