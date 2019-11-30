@@ -1,76 +1,132 @@
-import React, {useState} from 'react';
-import {View, Text, StyleSheet, ScrollView} from 'react-native';
-import {Button, List, TextInput} from 'react-native-paper';
+import React from 'react';
+import {View, Text, StyleSheet, ScrollView, Alert} from 'react-native';
+import {Button, Dialog} from 'react-native-paper';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {ListItem} from 'react-native-material-ui';
+import {Input} from 'react-native-elements';
 
-const PayScreen = () => {
+class PayScreen extends React.Component {
+    constructor(props) {
+        super(props);
+        this.onChange = this.onChange.bind(this);
+        this.submitPay = this.submitPay.bind(this);
+        this.onClose = this.onClose.bind(this);
+        this.state = {
+            money: '',
+            OTP: '',
+            isConfirm: false,
+            bankList: [
+                'Vietcombank',
+                'Techcombank',
+                'VPBank',
+                'TPBank',
+                'Bắc Á Bank',
+                'BIDV',
+                'ABC',
+                'VIB',
+            ],
+            bankName: ''
+        };
+    }
 
+    onChange(value, name) {
+        this.setState({[name]: value});
+    }
 
+    submitPay() {
+        if (!this.state.bankName) {
+            return Alert.alert('Bạn chưa chọn ngân hàng');
+        }
+        if (!this.state.money) {
+            return Alert.alert('Bạn chưa nhập tiền');
+        }
+        if (!this.state.OTP) {
+            return Alert.alert('Bạn chưa nhập mã OTP');
+        }
+        this.setState({isConfirm: true});
+    }
 
-    const [money, setMoney] = useState('');
-    const [isConfirm, setIsConfirm] = useState(false);
-    const [bankList] = useState([
-        'Vietcombank',
-        'Techcombank',
-        'VPBank',
-        'TPBank',
-        'Bắc Á Bank',
-        'BIDV',
-        'ABC',
-        'VIB',
-    ]);
-    const confirmMoney = () => {
-        setIsConfirm(true)
-        setMoney('')
-    };
+    onClose() {
+        this.setState({isConfirm: false, money: ''});
+        this.props.navigation.navigate('Home', {money: this.state.money});
+    }
 
-    return (
-        <View style={{flex: 1}}>
-            <View style={{flex: 4,
-                backgroundColor: Colors.lighter,}}>
-                <ScrollView>
-                    {bankList.map((name, index) => {
-                        return <ListItem
-                            key={index}
-                            divider
-                            centerElement={{
-                                primaryText: name,
-                            }}
-                            onPress={() => console.log('item')}
-                        />;
-                    })}
+    render() {
 
-                </ScrollView>
+        return (
+            <View style={{flex: 1}}>
+                <View style={{
+                    flex: 4,
+                    backgroundColor: Colors.lighter,
+                }}>
+                    <ScrollView>
+                        {this.state.bankList.map((name, index) => {
+                            return <ListItem
+                                key={index}
+                                divider
+                                style={{
+                                    container:{
+                                        backgroundColor: Colors.lighter,
+                                    },
+                                    primaryText:{color: name === this.state.bankName ? '#4fc3f7' : 'black'}
+                                }}
+                                centerElement={{
+                                    primaryText: name,
+                                }}
+                                onPress={() => this.setState({bankName: name})}
+                            />;
+                        })}
 
+                    </ScrollView>
+
+                </View>
+                <View style={styles.form}>
+                    <Text style={{marginLeft:15, fontSize:18}}>Nguồn tiền: {this.state.bankName}</Text>
+                    <Input
+                        value={this.state.money}
+                        keyboardType='numeric'
+                        onChangeText={(value) => this.onChange(value, 'money')}
+                        mode={'outlined'}
+                        placeholder='Nhập số tiền'
+                        style={styles.customInput}
+
+                    />
+                    <Input
+                        value={this.state.OTP}
+                        keyboardType='numeric'
+                        onChangeText={(value) => this.onChange(value, 'OTP')}
+                        mode={'outlined'}
+                        placeholder='Nhập số OTP ngân hàng'
+                        style={styles.customInput}
+                    />
+                </View>
+                <View style={styles.wrapButton}>
+                    <Button
+                        mode="contained"
+                        onPress={this.submitPay}
+                        style={styles.customButton}
+                        color="#1976d2"
+                    >
+                        Xác nhận
+                    </Button>
+                </View>
+                <Dialog
+                    visible={this.state.isConfirm}
+                    onDismiss={this.onClose}
+                >
+                    <Dialog.Title>Thông báo</Dialog.Title>
+                    <Dialog.Content>
+                        <Text>Bạn đã nạp thành công {this.state.money} vào tài khoản</Text>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button onPress={this.onClose}>Ok</Button>
+                    </Dialog.Actions>
+                </Dialog>
             </View>
-            <View style={styles.form}>
-                <Text>Số tiền là: {isConfirm && money} </Text>
-                <TextInput
-                    value={money}
-                    onChangeText={(number) => setMoney(number)}
-                    mode={'outlined'}
-                    placeholder='Nhập số tiền'
-                    style={{width: '70%', height: 40, marginBottom: 20, marginLeft: '15%'}}
-                />
-                <TextInput
-                    mode={'outlined'}
-                    placeholder='Nhập số OTP ngân hàng'
-                    style={{width: '70%', height: 40, marginLeft: '15%'}}
-                />
-            </View>
-            <View style={styles.wrapButton}>
-                <Button
-                    mode="contained"
-                    onPress={confirmMoney}
-                    style={styles.customButton}>
-                    Xác nhận
-                </Button>
-            </View>
-        </View>
-    );
+        );
+    }
+
 };
-
 
 
 const styles = StyleSheet.create({
@@ -91,6 +147,13 @@ const styles = StyleSheet.create({
         marginLeft: '30%',
         alignContent: 'center',
         justifyContent: 'center',
+        color:'red'
+    },
+    customInput: {
+        width: '70%',
+        height: 40,
+        marginLeft: '15%',
+        marginBottom: 20,
     },
 });
 
